@@ -1,14 +1,18 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
+import os
+
+# Safe path handling
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Load files
-model = joblib.load("model.pkl")
-train_cols = joblib.load("columns.pkl")
-train_dtypes = joblib.load("dtypes.pkl")
+model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
+train_cols = joblib.load(os.path.join(BASE_DIR, "columns.pkl"))
 
 st.title("Loan Default Predictor")
+
+st.info("This app uses key features. Remaining features are auto-filled.")
 
 st.header("Enter Loan Details")
 
@@ -24,26 +28,32 @@ loan_purpose = st.selectbox("Loan Purpose", ['p1', 'p2', 'p3', 'p4'])
 
 if st.button("Predict"):
 
-    # Create an empty DataFrame with the correct columns and initialize with None
-    input_data = pd.DataFrame(columns=train_cols)
-    input_data.loc[0] = None # Fill all columns in the first row with None
+    try:
+        # Create empty input
+        input_data = pd.DataFrame(columns=train_cols)
 
-    # Fill in the user-provided values
-    input_data.loc[0, 'age'] = age
-    input_data.loc[0, 'income'] = income
-    input_data.loc[0, 'loan_amount'] = loan_amount
-    input_data.loc[0, 'Credit_Score'] = credit_score
-    input_data.loc[0, 'Gender'] = gender
-    input_data.loc[0, 'loan_type'] = loan_type
-    input_data.loc[0, 'loan_purpose'] = loan_purpose
+        # Fill all with None (important)
+        input_data.loc[0] = None
 
-    # The pipeline's preprocessor will now correctly handle imputation and scaling
-    # No need for manual fillna or astype here, as the pipeline expects NaNs.
+        # Fill user inputs
+        input_data.loc[0, 'age'] = age
+        input_data.loc[0, 'income'] = income
+        input_data.loc[0, 'loan_amount'] = loan_amount
+        input_data.loc[0, 'Credit_Score'] = credit_score
+        input_data.loc[0, 'Gender'] = gender
+        input_data.loc[0, 'loan_type'] = loan_type
+        input_data.loc[0, 'loan_purpose'] = loan_purpose
 
-    pred = model.predict(input_data)
+        # Predict
+        pred = model.predict(input_data)
+        prob = model.predict_proba(input_data)[0][1]
 
-    if pred[0] == 1:
-        st.error("Loan will Default")
-    else:
-        st.success("Loan will NOT Default")
- 
+        # Output
+        if pred[0] == 1:
+            st.error(f"Loan will Default ❌ (Prob: {prob:.2f})")
+        else:
+            st.success(f"Loan will NOT Default ✅ (Prob: {prob:.2f})")
+
+    except Exception as e:
+        st.error("Error occurred:")
+        st.write(str(e))
