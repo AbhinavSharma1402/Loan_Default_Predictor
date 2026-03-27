@@ -24,9 +24,11 @@ loan_purpose = st.selectbox("Loan Purpose", ['p1', 'p2', 'p3', 'p4'])
 
 if st.button("Predict"):
 
-    # Create input with correct schema
+    # Create an empty DataFrame with the correct columns and initialize with None
     input_data = pd.DataFrame(columns=train_cols)
+    input_data.loc[0] = None # Fill all columns in the first row with None
 
+    # Fill in the user-provided values
     input_data.loc[0, 'age'] = age
     input_data.loc[0, 'income'] = income
     input_data.loc[0, 'loan_amount'] = loan_amount
@@ -35,15 +37,8 @@ if st.button("Predict"):
     input_data.loc[0, 'loan_type'] = loan_type
     input_data.loc[0, 'loan_purpose'] = loan_purpose
 
-    # Fill missing + match types
-    for col in input_data.columns:
-        if train_dtypes[col] == 'object':
-            input_data[col] = input_data[col].fillna('Missing').astype(str)
-        else:
-            input_data[col] = pd.to_numeric(input_data[col], errors='coerce')
-            input_data[col] = input_data[col].fillna(0)
-
-    input_data = input_data.astype(train_dtypes)
+    # The pipeline's preprocessor will now correctly handle imputation and scaling
+    # No need for manual fillna or astype here, as the pipeline expects NaNs.
 
     pred = model.predict(input_data)
 
@@ -51,3 +46,4 @@ if st.button("Predict"):
         st.error("Loan will Default")
     else:
         st.success("Loan will NOT Default")
+ 
