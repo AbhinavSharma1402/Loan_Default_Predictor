@@ -108,7 +108,7 @@ streamlit run app.py
 
 ##  Live Demo
 
- [Add your Streamlit link here]
+ https://loandefaultpredictor-8x8vkmnam6akigr7wqkhe8.streamlit.app/
 
 ---
 
@@ -135,8 +135,5 @@ streamlit run app.py
 
 If you found this project useful or interesting, feel free to connect!
 
-* GitHub: [Your Profile]
-
-
-Give it a ⭐ — it helps a lot!
+* GitHub: https://github.com/AbhinavSharma1402
 
